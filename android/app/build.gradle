@@ -1,0 +1,108 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+if (flutterVersionCode == null) {
+    flutterVersionCode = '1'
+}
+
+def flutterVersionName = localProperties.getProperty('flutter.versionName')
+if (flutterVersionName == null) {
+    flutterVersionName = '1.0'
+}
+
+android {
+    namespace "com.arre.arre_demo"
+    compileSdk 34
+    ndkVersion flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+
+    defaultConfig {
+        applicationId "com.arre.arre_demo"
+        minSdkVersion 24
+        targetSdkVersion 34
+
+        def buildTypeName = gradle.startParameter.taskNames.empty ? "" : gradle.startParameter.taskNames.get(0)
+        println "BuildType:  ${buildTypeName}"
+        if (buildTypeName.contains("Debug")) {
+            defaultConfig.versionCode 1
+            defaultConfig.versionName "0.0.1(Debug)"
+            println "BuildType:  Debug"
+        } else if (buildTypeName.contains("Profile")) {
+            defaultConfig.versionCode 1
+            defaultConfig.versionName "0.0.1(Profile)"
+            println "BuildType:  Profile"
+        } else {
+            defaultConfig.versionCode 4
+            defaultConfig.versionName "0.2.4"
+            println "BuildType:  Release"
+        }
+
+        multiDexEnabled true
+    }
+
+    signingConfigs {
+        release {
+            storeFile file("../keyStore/debugKey.jks")
+            storePassword "Nflow@(2798)"
+            keyAlias "ShopPlusDebug"
+            keyPassword "Nflow@(2798)"
+        }
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
+            zipAlignEnabled false
+            minifyEnabled false
+            shrinkResources false
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        profile {
+            zipAlignEnabled true
+            minifyEnabled true
+            shrinkResources true
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        release {
+            zipAlignEnabled true
+            minifyEnabled true
+            shrinkResources true
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+flutter {
+    source '../..'
+}
+
+dependencies {
+    implementation "androidx.multidex:multidex:2.0.1"
+}
